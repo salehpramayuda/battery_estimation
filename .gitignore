@@ -150,6 +150,11 @@ acs-*.bib
 *.ilg
 *.ind
 
+# mat
+*.mat
+code/src/Parameters_and_Signals.mat
+code/src/210520_Versuch.mat
+
 # minitoc
 *.maf
 *.mlf
@@ -165,6 +170,9 @@ _minted*
 
 # morewrites
 *.mw
+
+# mp4
+WhatsApp Video 2021-04-01 at 18.25.24.mp4
 
 # nomencl
 *.nlg
@@ -274,3 +282,7 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+
+
+literatur
+code/slprj
