@@ -152,6 +152,7 @@ acs-*.bib
 
 # mat
 *.mat
+**.asv
 code/src/Parameters_and_Signals.mat
 code/src/210520_Versuch.mat
 

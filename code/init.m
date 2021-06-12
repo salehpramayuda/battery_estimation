@@ -17,6 +17,7 @@ voltage = main_data{volt_ind}.Values;
 current = main_data{cur_ind}.Values;
 
 %% Clean Data
+addpath('./function')
 [volt_clean, place] = clean(voltage,8);
 cur_clean = timeseries(current.Data(place), current.Time(place));
 
