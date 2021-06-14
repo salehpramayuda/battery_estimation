@@ -1,6 +1,6 @@
 clc; clear;
 %% Setup
-load('210520_Versuch');
+load('src/210609_data');
 main_data = data{1};
 volt_ind = find(ismember(getElementNames(main_data),'Voltage(V)'));
 if isempty(volt_ind)

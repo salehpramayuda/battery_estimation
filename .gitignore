@@ -155,6 +155,7 @@ acs-*.bib
 **.asv
 code/src/Parameters_and_Signals.mat
 code/src/210520_Versuch.mat
+**.slx.autosave
 
 # minitoc
 *.maf
