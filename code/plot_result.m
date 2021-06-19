@@ -6,13 +6,13 @@ modelConfigSet = getActiveConfigSet(systemModel);
 modelConfig = modelConfigSet.copy;
 simResult = sim(filename, modelConfig);
 %%
-x = simResult.simout(:,1:5);
-%x = simResult.simout_check(:,3:7);
+%x = simResult.simout(:,1:5);
+x = simResult.simout_check(:,3:7);
 u = simResult.simout(:,6);
 y = simResult.simout(:,7);
 t = simResult.tout;
 y_hat = simResult.simout_check(:,1);
-y_hat_ = simResult.simout_check(:,1);
+y_hat_ = simResult.simout_check(:,2);
 
 %% Plot
 g = figure('Name', 'EKF Zustände');
@@ -63,18 +63,20 @@ grid();ylabel('Current [A]');xlabel('Time [s]');
 
 %% Check output
 fit = 100*(1-goodnessOfFit(y_hat, y, 'NRMSE'));
-fit_ = 100*(1-goodnessOfFit(y_hat_, y, 'NRMSE'));
 h = figure('Name', 'Check Output');
 grid on; hold on;
 plot(t, y, 'g', 'LineWidth', 1.5);
 plot(t, y_hat, 'r--');
-plot(t, y_hat_, 'b--');
-legend({'y_{mess}','y_{sim-param-const}','y_{sim_ekf}'}); title('Check Output');
+legend({'y_{mess}','y_{sim param-const}'}); title('Check Output');
 xlabel('Time [s]');ylabel('Voltage [V]');
 
 disp(fit);
-disp(fit_);
 
+%%
+f= figure('Name', 'Output Error');
+plot(t, y-y_hat);
+grid on
+xlabel('Time [s]'); ylabel('Voltage [V]');
 
 
 

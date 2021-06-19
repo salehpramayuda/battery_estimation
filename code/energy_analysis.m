@@ -22,9 +22,9 @@ legend('P dissipated by Stepper/EHC','P harvested into battery','P consumption M
 figure(2);clf;
 plot(P_harvested./P_damping_electric,'b'); hold on;
 
-mean(P_harvested)/mean(P_damping_electric)
+mean(P_harvested)/mean(P_damping_electric);
 
-E=cumtrapz(t,P)
+E=cumtrapz(t,P);
 
 figure(1);
 subplot(2,1,2);

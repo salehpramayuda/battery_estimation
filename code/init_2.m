@@ -1,7 +1,7 @@
 clc; clear;
 %% Setup
 load('src/210609_data');
-main_data = data{1};
+main_data = data{11};
 volt_ind = find(ismember(getElementNames(main_data),'Voltage(V)'));
 if isempty(volt_ind)
     disp('Dataset does not contain measured voltage');
@@ -35,13 +35,13 @@ soc = 0:0.05:1;
 phi = [soc'.^2 soc' ones(21,1)];
 param = inv(phi'*phi)*phi'*u_oc;
 
-figure(); 
-plot(soc, (phi*param));
-grid on;
-title('Estimierte SOC-Kennline');
-ylabel('u_{oc} [V]'); xlabel('State of Charge SOC [%]');
+%figure(); 
+%plot(soc, (phi*param));
+%grid on;
+%title('Estimierte SOC-Kennline');
+%ylabel('u_{oc} [V]'); xlabel('State of Charge SOC [%]');
 
-exportgraphics(gcf, 'soc_kurve.pdf', 'ContentType', 'Vector');
+%exportgraphics(gcf, 'soc_kurve.pdf', 'ContentType', 'Vector');
 %% 2nd Version of EKF
 % x1 = 1/C; x2 = 1/R; x3 = 1/R0; 
 % x4 = SOC; x5 = U (Voltage over Capacitor)
