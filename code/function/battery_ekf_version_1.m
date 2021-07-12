@@ -1,8 +1,7 @@
-function battery_ekf(block)
+function battery_ekf_version_1(block)
 % Level-2 MATLAB file S-Function 
-% Discrete function for parameter estimation using
-% extended kalman filter 
-% input: voltage over battery, output: 
+% Discrete-time state-space model with u and 
+% a (time-varying parameter) as inputs
   setup(block)
   
 %endfunction
@@ -94,14 +93,10 @@ function Output(block)
   x_p_k     = block.Dwork(1).Data;
   P_p_k     = reshape(block.Dwork(2).Data, 5,5);
   
-% calculate kalman-gain and real covariance matrix
-%   y_hat = a(1)*x_p_k(4)^2+a(2)*x_p_k(4)+a(3)+x_p_k(5)+...
-%       u_k/x_p_k(3);
-%   C = [0, 0, -u_k/x_p_k(3)^2, 2*a(1)*x_p_k(4)+a(2), 1];
-  u_oc = a(1)*x_p_k(4)^2+a(2)*x_p_k(4)+a(3);
-  y_hat = x_p_k(3)*(u_k-(u_oc+x_p_k(5)));
-  C = [0, 0, -u_oc+u_k-x_p_k(5), -x_p_k(3)*(a(2)+2*a(1)*x_p_k(4)), -x_p_k(3)];
-  
+  %calculate kalman-gain and real covariance matrix
+  y_hat = a(1)*x_p_k(4)^2+a(2)*x_p_k(4)+a(3)+x_p_k(5)+...
+      u_k/x_p_k(3);
+  C = [0, 0, -u_k/x_p_k(3)^2, 2*a(1)*x_p_k(4)+a(2), 1];
   K = P_p_k*C'/(Z_k + C*P_p_k*C');
   xk = x_p_k + K*(y_k - y_hat);
   Pk = P_p_k - K*C*P_p_k;
@@ -117,31 +112,20 @@ function Output(block)
 
 function Update(block)
   %update the states
-  xk        = block.Dwork(1).Data;
-  Pk        = reshape(block.Dwork(2).Data,5,5);
+  xk       = block.Dwork(1).Data;
+  Pk       = reshape(block.Dwork(2).Data,5,5);
   Delta     = block.DialogPrm(1).Data;
-  a         = block.DialogPrm(4).data;
   W_k       = block.DialogPrm(6).Data;
   Q_e       = block.DialogPrm(7).Data;
   
   u_k       = block.InputPort(1).Data;
-  u_oc      = a(1)*xk(4)^2+a(2)*xk(4)+a(3);
   
   %calculate prediction
-%   Ak       = [[eye(4); zeros(1,4)], [Delta*(u_k-xk(5)*xk(3));0;...
-%       -Delta*xk(1)*xk(5);0;1-Delta*xk(1)*xk(3)]];
-%     
-%   x_p_kp1    = [xk(1);xk(2);xk(3);xk(4)+Delta*u_k/Q_e;...
-%       xk(5)-Delta*xk(1)*(xk(5)*xk(2)-u_k)];
-
-  y_k = xk(3)*(u_k-(u_oc+xk(5)));
-  Ak = [[eye(3) zeros(3,2)]; 0 0 -Delta*(u_oc-u_k+xk(5))/Q_e, 1-Delta*xk(3)*...
-      (a(2)+2*a(1)*xk(4))/Q_e, -Delta*xk(3)/Q_e;...
-      -Delta*(u_k*xk(2)+xk(3)*(u_oc-u_k+xk(5))), -Delta*u_k*xk(1), -Delta*...
-      xk(1)*(u_oc-u_k+xk(5)), -Delta*xk(1)*xk(3)*(a(2)+2*a(1)*xk(4)), ...
-      1-Delta*xk(1)*xk(3)];
-  x_p_kp1 = [xk(1);xk(2);xk(3);xk(4)+Delta*y_k/Q_e;xk(5)+Delta*xk(1)*(y_k-...
-      xk(2)*xk(5))];
+  Ak       = [[eye(4); zeros(1,4)], [Delta*(u_k-xk(5)*xk(3));0;...
+      -Delta*xk(1)*xk(5);0;1-Delta*xk(1)*xk(3)]];
+    
+  x_p_kp1    = [xk(1);xk(2);xk(3);xk(4)+Delta*u_k/Q_e;...
+      xk(5)-Delta*xk(1)*(xk(5)*xk(2)-u_k)];
   P_p_kp1    = Ak*Pk*Ak' + W_k;
  
   %update Dwork

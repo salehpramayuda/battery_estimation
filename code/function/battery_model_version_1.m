@@ -62,20 +62,18 @@ function Output(block)
   u_oc = a(1)*x(1)^2+a(2)*x(1)+a(3);
   
   %calculate y(t)
-  block.OutputPort(1).Data = [param(3)*(u-u_oc-x(2)), u_oc, x(1), x(2)];
+  block.OutputPort(1).Data = [u_oc+x(2)+u/param(3), u_oc, x(1), x(2)];
   
 %endfunction
 
 function Derivatives(block)
   %calculate x_dot 
-  u     = block.InputPort(1).Data;
+  u = block.InputPort(1).Data;
   param = block.DialogPrm(1).Data(1:3);
-  a     = block.DialogPrm(2).Data;
-  Q     = block.DialogPrm(3).Data;
-  x     = block.ContStates.Data;
-  u_oc  = a(1)*x(1)^2+a(2)*x(1)+a(3);
+  Q = block.DialogPrm(3).Data;
+  x = block.ContStates.Data;
   
-  x_dashdot = [param(3)*(u-u_oc-x(2))/Q; -param(1)*(x(2)*param(2)-param(3)*(u-u_oc-x(2)))];
+  x_dashdot = [u/Q; -param(1)*(x(2)*param(2)-u)];
   block.Derivatives.Data = x_dashdot;
   
  %endfunction

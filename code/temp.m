@@ -1,4 +1,4 @@
-clc;clear;
+
 %% Setup
 load('src/210609_data');
 addpath('./function/')
@@ -19,7 +19,7 @@ current = main_data{cur_ind}.Values;
 time_mes = voltage.Time(end);
 
 % Split measured data into estimation and validation
-time_est = 400;
+time_est = 300;
 time_val = time_mes - time_est;
 
 [~,ind_val] = min(abs(voltage.Time-time_est));
@@ -32,11 +32,12 @@ cur_est = timeseries(current.Data(1:ind_val),current.Time(1:ind_val));
 cur_val = timeseries(current.Data(ind_val+1:end),...
     current.Time(ind_val+1:end)-current.Time(ind_val+1));
 
-
+val_data = iddata(volt_val.Data, cur_val.Data,[],'SamplingInstants',...
+    cur_val.Time);
 %% Find Variance of zeta Z_k
-[m,ind] = min(abs(current.Time-55));
-static_curr = current.Data(1:ind);
-Z_k = var(static_curr);
+[m,ind] = min(abs(voltage.Time-55));
+static_volt = voltage.Data(1:ind);
+Z_k = var(static_volt);
 
 %% SOC-Graph
 u_oc = 2*[9.75, 10.1, 10.3, 10.55, 10.75, 10.9, 11.2, 11.3, 11.45, ...
@@ -44,7 +45,10 @@ u_oc = 2*[9.75, 10.1, 10.3, 10.55, 10.75, 10.9, 11.2, 11.3, 11.45, ...
     12.60, 12.60, 12.65]';
 soc = 0:0.05:1;
 phi = [soc'.^2 soc' ones(21,1)];
-param = inv(phi'*phi)*phi'*u_oc;
+param = inv(phi'*phi)*phi'*u_oc; 
+% param(1) = param(1)*1.3; 
+% param(3) = u_oc(1);
+% param(2)=u_oc(end)-param(1)-param(3);
 % figure(1);
 % plot(soc, u_oc); hold on
 % plot(soc, phi*param);
@@ -60,7 +64,7 @@ param = inv(phi'*phi)*phi'*u_oc;
 
 Delta = 8e-3; 
 x0 = [2/790.27; 1/0.0126/2; 1/0.0086/2; 0.5; 0];
-Q_e = 2.9*3600; a1 = param(1); a2 = param(2); a3 = param(3);
+Q_e = 2.9*3600;
 a = param;
 
 P0 = eye(5); P0(1,1)=(0.03*x0(1))^2;P0(2,2)=(0.03*x0(2))^2;P0(3,3)=(0.03*x0(3))^2;
@@ -78,13 +82,12 @@ simResult = sim(filename, modelConfig);
 x = simResult.simout(1:6,:);
 x_conv = x(:,end);
 
-%% Validate Model
-
 filename = 'validierung';
 systemModel = load_system(filename);
 modelConfigSet = getActiveConfigSet(systemModel);
 modelConfig = modelConfigSet.copy;
 simResult = sim(filename, modelConfig);
+
 %%
 t_val = simResult.tout;
 y_hat = simResult.simout(:,1);

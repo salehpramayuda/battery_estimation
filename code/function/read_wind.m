@@ -1,4 +1,4 @@
-function [data, speed] = read_wind(filename)
+function [data, speed] = read_wind(filename, destination)
     %% Read wind data from xls file from rp5.ru
     data = readcell(filename);
     data_ = data(8:end,:);
@@ -55,9 +55,11 @@ function [data, speed] = read_wind(filename)
     % plot wind speed
     figure();
     plot(speed);
+    title('Windgeschwindigkeit von 01. Juni 2020 bis 31. Mai 2021');
     xlabel(['Days', newline, num2str(per_09),'% above or equal 9m/s',...
         newline, num2str(per_10), '% above or equal 10m/s']);
     ylabel('Speed [m/s]');
+    exportgraphics(gcf, destination, 'ContentType', 'Vector');
 
 %         % check wind speed
 %         spid = data_(j,8); spid = spid{1};
