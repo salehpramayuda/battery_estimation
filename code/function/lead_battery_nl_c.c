@@ -13,87 +13,33 @@ void compute_dx(double *dx, double t, double *x, double *u, double **p,
                 const mxArray *auxvar)
 {
     // Declare model parameters
-    double *a1, *a2, *a3, *Cm1, *Rm1, *R0dm1, *R0cm1;
+    double *Cm1, *Rm1, *R0dm1, *R0cm1;
     // Declare intermediate variables
-    double u_l = u;
-    double u_oc;
-    double Q_e;
-    double i_b;
+    double Q_e = 2.9*3600;
     
     // Retrieve model parameters
-    a1 = p[0]; a2 = p[1]; a3 = p[2]; // Parameters for the U_oc(SoC)
     Cm1 = p[3]; Rm1 = p[4]; R0dm1 = p[5]; R0cm1 = p[6];
     
+    // calculate derivative
+    dx[0] = u/Q_e;
+    dx[1] = Cm1*(u-x[1]*Rm1);
     
-    /* Declare model parameters. */
-    double *Rs, *Cp, *g_ch,*g_pk, *lam1, *lam2, *lam3, *c1, *c2, *c3, *c4, *c5, *c6, *v_r, *tau_x, *g_i;
-    /* Declare intermediate variables. */
-    double i;   /* injected current.    */     
-    double q;   /* injected charge.     */
-    double alpha_g;
-    double beta_g;
-    double z;
-    double g_x;
-    double g_p_inf;
-    double y;   /* output (voltage over skin) */
-
-    
-    i = u[0];
-    q = u[1];
-        
-    /* Retrieve model parameters. */
-    Rs = p[0];   
-    Cp  = p[1];   
-    g_ch = p[2];   
-    g_pk  = p[3];   
-    lam1 = p[4];   
-    lam2 = p[5];   
-    lam3 = p[6];
-    c1 = p[7];
-    c2 = p[8];
-    c3 = p[9];
-    c4 = p[10];
-    c5 = p[11];
-    c6 = p[12];
-    v_r = p[13];
-    tau_x = p[14];
-    g_i = p[15];
-    
-    /* Calculate voltage over skin */
-    y = x[0] + Rs[0]*i;
-    
-    if (fabs(i)<0.1e-3 && fabs(y)<0.05){
-        // if system at rest (both current and voltage 0: Rp does not change)
-        dx[1] = 0;
-    }else{
-        /* Intermediate equations */
-        alpha_g = c2[0]*(1-exp(c3[0]*(y+v_r[0])));
-        beta_g = c4[0]/(exp(c5[0]*(y+v_r[0]+c6[0]))+1);
-        z = beta_g + alpha_g*(c1[0]-beta_g);
-        g_x = (g_ch[0]+i*g_i[0]-q)/tau_x[0];
-        g_p_inf = g_pk[0]*(lam1[0]+lam2[0]*(1-exp(lam3[0]*i)))/(g_pk[0]-(lam1[0]+lam2[0]*(1-exp(lam3[0]*i))));
-        dx[1] = (g_p_inf-x[1])*z+g_x;
-    }
-    
-    
-    /* x[0]: Capacitor Voltage u_cp. */
-    /* x[1]: Parallel Conductance g_p. */
-    dx[0] = (-x[1]*x[0]+i)/Cp[0];
-    
-//       printf("Completed Calculation of dx @ t = %d\n",t[0]);
 }
 
 /* Output equation. */
 void compute_y(double *y, double t, double *x, double *u, double **p,
                const mxArray *auxvar)
 {
-    double *Rs;
-    Rs = p[0];   
-
-    /* y[0]: Skin Voltage. */
-    y[0] = x[0]+Rs[0]*u[0];
-    
-//     printf("Completed Calculation of y @ t = %d\n",t);
+    double *a1, *a2, *a3, *R0cm1, *R0dm1;
+    a1 = p[0]; a2 = p[1]; a3 = p[2]; R0dm1 = p[5]; R0cm1 = p[6];
+    double R0m1;
+    if(u>=0){
+        R0m1 = R0cm1;
+    }
+    else{
+        R0m1 = R0dm1;
+    }
+    y[0] = a1*x[0]*x[0]+a2*x[0]+a3 + x[1] + u/R0m1;
 }
 
 

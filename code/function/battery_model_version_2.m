@@ -1,7 +1,6 @@
-function battery_model(block)
+function battery_model_version_2(block)
 % Level-2 MATLAB file S-Function 
 % Model Lead-Acid Battery based of ... et al (201x)
-% modified to be suited for Vrontos (2020)
   setup(block)
   
 %endfunction
@@ -76,7 +75,8 @@ function Derivatives(block)
   x     = block.ContStates.Data;
   u_oc  = a(1)*x(1)^2+a(2)*x(1)+a(3);
   
-  x_dashdot = [param(3)*(u-u_oc-x(2))/Q; -param(1)*(x(2)*param(2)-param(3)*(u-u_oc-x(2)))];
+  x_dashdot = [param(3)*(u-u_oc-x(2))/Q;
+      -param(1)*(x(2)*param(2)-param(3)*(u-u_oc-x(2)))];
   block.Derivatives.Data = x_dashdot;
   
  %endfunction

@@ -77,7 +77,7 @@ if 1
 end
 
 %% Simulate EKF
-if 0
+if 1
     % Activate EKF
     filename = 'akku_schaetzung';
     systemModel = load_system(filename);
@@ -99,11 +99,15 @@ if 0
 end
 %% simulate with idnlgrey
 order = [1, 1, 2];
-bat_model = idnlgrey('lead_battery_nl',order,[a_;x_conv(1:3);...
+bat_model = idnlgrey('./function/lead_battery_nl',order,[a_;x_conv(1:3);...
     x_conv(3)],x_conv(4:5));
 % fix parameter value of SoC-Uoc Curve
 if 0
     for i = 1:3
+        bat_model.Parameters(i).Fixed = true;
+    end
+else
+    for i = 4:7
         bat_model.Parameters(i).Fixed = true;
     end
 end

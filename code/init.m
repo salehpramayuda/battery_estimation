@@ -34,9 +34,15 @@ cur_val = timeseries(current.Data(ind_val+1:end),...
 
 
 %% Find Variance of zeta Z_k
-[m,ind] = min(abs(current.Time-55));
-static_curr = current.Data(1:ind);
-Z_k = var(static_curr);
+% for i as input
+[m,ind] = min(abs(voltage.Time-55));
+static_volt = voltage.Data(1:ind);
+Z_k = var(static_volt);
+
+% % for u as input
+% [m,ind] = min(abs(current.Time-55));
+% static_curr = current.Data(1:ind);
+% Z_k = var(static_curr);
 
 %% SOC-Graph
 u_oc = 2*[9.75, 10.1, 10.3, 10.55, 10.75, 10.9, 11.2, 11.3, 11.45, ...
@@ -59,14 +65,19 @@ param = inv(phi'*phi)*phi'*u_oc;
 % x4_0 = 50%; x5_0 = 0;
 
 Delta = 8e-3; 
-x0 = [2/790.27; 1/0.0126/2; 1/0.0086/2; 0.5; 0];
 Q_e = 2.9*3600; a1 = param(1); a2 = param(2); a3 = param(3);
 a = param;
+% x0 = [2/790.27; 1/0.0126/2; 1/0.0086/2; 0.5; 0];
+% P0 = eye(5); P0(1,1)=(0.03*x0(1))^2;P0(2,2)=(0.03*x0(2))^2;P0(3,3)=(0.03*x0(3))^2;
+% P0(4,4)=0.5^2;P0(5,5)=(voltage.Data(1)*0.05)^2;
+% W_k = 0.0*eye(5);
 
-P0 = eye(5); P0(1,1)=(0.03*x0(1))^2;P0(2,2)=(0.03*x0(2))^2;P0(3,3)=(0.03*x0(3))^2;
-P0(4,4)=0.5^2;P0(5,5)=(voltage.Data(1)*0.05)^2;
-
-W_k = 0.0*eye(5);
+% for ekf version 3
+x0 = [2/790.27; 1/0.0126/2; 1/0.0086/2;1/3.3e-4; 0.5; 0; 0;volt_est.Data(1)*3.3e-4];
+P0 = eye(8); P0(1,1)=(0.03*x0(1))^2;P0(2,2)=(0.03*x0(2))^2;P0(3,3)=(0.03*x0(3))^2;
+P0(4,4)=(0.03*x0(4))^2;P0(5,5)=0.5^2;P0(6,6)=(voltage.Data(1)*0.05)^2;
+P0(7,7)=(0.02-cur_est.Data(1))^2; P0(8,8)= (0.3*x0(8))^2;
+W_k = 0.0*eye(8);
 
 %% Simulate EKF
 filename = 'akku_schaetzung';
@@ -75,7 +86,7 @@ modelConfigSet = getActiveConfigSet(systemModel);
 modelConfig = modelConfigSet.copy;
 simResult = sim(filename, modelConfig);
 
-x = simResult.simout(1:6,:);
+x = simResult.simout(1:8,:);
 x_conv = x(:,end);
 
 %% Validate Model
@@ -86,15 +97,18 @@ modelConfigSet = getActiveConfigSet(systemModel);
 modelConfig = modelConfigSet.copy;
 simResult = sim(filename, modelConfig);
 %%
-t_val = simResult.tout;
-y_hat = simResult.simout(:,1);
-error = simResult.simout(:,3);
+t_val = simResult.tout(5:end);
+y_hat = simResult.simout(5:end,1);
+error = simResult.simout(5:end,3);
 
 figure();
 plot(t_val, y_hat); hold on; grid on
-plot(volt_val);
+%plot(volt_val);
+plot(cur_val); % for u = u_l, y = i_bat
 hold off
 legend('simulated', 'measured');
 
 figure();
 plot(t_val, error);grid on;
+
+fit = 100*(1-goodnessOfFit(y_hat, simResult.simout(5:end,4), 'NRMSE'))
