@@ -124,7 +124,7 @@ function Output(block)
   % calculate kalman-gain and real covariance matrix
   y_L_hat = x_p_k(2);
   C_L = [0, 1];
-  K_L = P_L_p_k*C_L'/(Z_L_k + C*P_L_p_k*C_L');
+  K_L = P_L_p_k*C_L'/(Z_L_k + C_L*P_L_p_k*C_L');
   x_L_k = x_L_p_k + K_L*(y_k-y_L_hat);
   P_L_k = P_L_p_k - K_L*C_L*P_L_p_k;
   
@@ -158,7 +158,7 @@ function Update(block)
   
   % calculate prediction
   Ak = [[eye(3), zeros(3,3)]; 0, 0, 1, 0, 0, Delta/Q_e;
-    Delta*(xk(6)-xk(2)*xk(5)), -Delta*xk(1)*xk(5), 0, 0, 1-Delta*xk(1)*xk(2), Delta*x1;
+    Delta*(xk(6)-xk(2)*xk(5)), -Delta*xk(1)*xk(5), 0, 0, 1-Delta*xk(1)*xk(2), Delta*xk(1);
     -Delta*(xk(3)*xk(6)-xk(2)*xk(3)*xk(5)), Delta*xk(1)*xk(3)*xk(5), ...
     Delta*(u_k/Cg-xk(6)*(xk(1)+1/Cg)+xk(1)*xk(2)*xk(5)), 2*Delta*a(1)*xk(6)/Q_e,...
     Delta*xk(1)*xk(2)*xk(3), Delta*((a(2)+2*a(1)*xk(4))/Q_e-xk(3)*(xk(1)+1/Cg))+1];
