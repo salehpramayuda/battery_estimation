@@ -2,7 +2,7 @@ clc;clear;
 %% Setup
 addpath('./../..')
 load('../../src/210609_data');
-addpath('./function/')
+addpath('./../../function/')
 main_data = data{11};
 volt_ind = find(ismember(getElementNames(main_data),'Voltage(V)'));
 if isempty(volt_ind)
@@ -95,36 +95,36 @@ P_b_0 = (0.3*x_b_0)^2;
 
 % error variance matrix for last-ekf
 W_b_k = 0;
-%% Simulate EKF
-filename = 'akku_schaetzung';
-systemModel = load_system(filename);
-modelConfigSet = getActiveConfigSet(systemModel);
-modelConfig = modelConfigSet.copy;
-simResult = sim(filename, modelConfig);
-
-x = simResult.simout(1:8,:);
-x_conv = x(:,end);
-
-%% Validate Model
-
-filename = 'validierung';
-systemModel = load_system(filename);
-modelConfigSet = getActiveConfigSet(systemModel);
-modelConfig = modelConfigSet.copy;
-simResult = sim(filename, modelConfig);
-%%
-t_val = simResult.tout(5:end);
-y_hat = simResult.simout(5:end,1);
-error = simResult.simout(5:end,3);
-
-figure();
-plot(t_val, y_hat); hold on; grid on
-%plot(volt_val);
-plot(cur_val); % for u = u_l, y = i_bat
-hold off
-legend('simulated', 'measured');
-
-figure();
-plot(t_val, error);grid on;
-
-fit = 100*(1-goodnessOfFit(y_hat, simResult.simout(5:end,4), 'NRMSE'))
+% %% Simulate EKF
+% filename = 'dekf_estimate';
+% systemModel = load_system(filename);
+% modelConfigSet = getActiveConfigSet(systemModel);
+% modelConfig = modelConfigSet.copy;
+% simResult = sim(filename, modelConfig);
+% 
+% x = simResult.simout;
+% x_conv = x(:,end);
+% 
+% %% Validate Model
+% 
+% filename = 'validierung';
+% systemModel = load_system(filename);
+% modelConfigSet = getActiveConfigSet(systemModel);
+% modelConfig = modelConfigSet.copy;
+% simResult = sim(filename, modelConfig);
+% %%
+% t_val = simResult.tout(5:end);
+% y_hat = simResult.simout(5:end,1);
+% error = simResult.simout(5:end,3);
+% 
+% figure();
+% plot(t_val, y_hat); hold on; grid on
+% %plot(volt_val);
+% plot(cur_val); % for u = u_l, y = i_bat
+% hold off
+% legend('simulated', 'measured');
+% 
+% figure();
+% plot(t_val, error);grid on;
+% 
+% fit = 100*(1-goodnessOfFit(y_hat, simResult.simout(5:end,4), 'NRMSE'))
