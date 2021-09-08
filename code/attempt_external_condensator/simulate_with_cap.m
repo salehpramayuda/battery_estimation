@@ -36,7 +36,7 @@ function setup(block)
     block.SampleTimes = [0 0];
     
     %% Setup Dwork
-    block.NumContStates = 3;
+    block.NumContStates = 4;
   
     %% Set the block simStateCompliance to default 
     %% (i.e., same as a built-in block)
@@ -50,24 +50,18 @@ function setup(block)
 %endfunction
 
 function InitConditions(block)
-    %% Initialize continuous states u_L, SoC, u_rc
-    block.ContStates.Data = [block.DialogPrm(1).Data(6); block.DialogPrm(1).Data(4:5)];
-
+    %% Initialize continuous states SoC, u_rc, i_b, u_L
+    %block.ContStates.Data = [block.DialogPrm(1).Data(6); block.DialogPrm(1).Data(4:5)];
+    block.ContStates.Data = block.DialogPrm(1).Data(4:7);
 %endfunction
 
 function Output(block)
     %% Output the simulated voltage
     i_L     = block.InputPort(1).Data;
-    x       = block.ContStates.Data; 
-    param   = block.DialogPrm(1).Data(1:3);
-    a       = block.DialogPrm(2).Data;
+    i_b     = block.ContStates.Data(3);
     
-    u_oc    = a(1)*x(2)^2+a(2)*x(2)+a(3);
-    i_b     = param(3)*(x(1)-x(3)-u_oc);
-    i_c     = i_L - i_b;
-    
-    block.OutputPort(1).Data = x(1);
-    block.OutputPort(2).Data = [i_b; i_c];
+    block.OutputPort(1).Data = block.ContStates.Data(4);
+    block.OutputPort(2).Data = [i_b, i_L-i_c];
 %endfunction
 
 function Derivative(block)
@@ -78,16 +72,14 @@ function Derivative(block)
     Qe      = block.DialogPrm(3).Data;
     Cg      = block.DialogPrm(4).Data;
     
-    x       = block.ContStates.Data;      % x = [u_L, SoC, u_rc]
-    u_oc    = a(1)*x(2)^2+a(2)*x(2)+a(3);
-    
-    i_b     = param(3)*(x(1)-x(3)-u_oc);
-    
+    x       = block.ContStates.Data;      % x = [u_L, SoC, u_rc] 
     %% Calculate derivatives for every state
-    dsoc    = 1/Qe*i_b;
-    durc    = param(1)*(i_b-x(3)*param(2));
-    dul     = 1/Cg*(i_L-i_b);
+    dsoc    = 1/Qe*x(3);
+    durc    = param(1)*(x(3)-x(2)*param(2));
+    dib     = param(3)*(i_L/Cg + x(2)*param(1)*param(2)-x(3)*(1/Cg+param(3)+...
+            (2*a(1)*x(1)+a(2))/Qe));
+    dul     = 1/Cg*(i_L-x(3));
     
-    block.Derivatives.Data = [dul;dsoc;durc];
+    block.Derivatives.Data = [dsoc;durc;dib;dul];
 
 %endfunction

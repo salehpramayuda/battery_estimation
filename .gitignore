@@ -186,6 +186,10 @@ WhatsApp Video 2021-04-01 at 18.25.24.mp4
 # pax
 *.pax
 
+# pdf
+Abschlussarbeit_Anmeldung_Saleh.pdf
+Abschlussarbeit_Anmeldung.pdf
+
 # pdfpcnotes
 *.pdfpc
 
@@ -289,4 +293,3 @@ TSWLatexianTemp*
 
 
 literatur
-code/slprj
