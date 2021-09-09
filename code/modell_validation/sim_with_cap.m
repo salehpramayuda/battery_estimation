@@ -56,7 +56,7 @@ function DoPostPropSetup(block)
   
   % States x
   block.Dwork(1).Name               = 'x'; 
-  block.Dwork(1).Dimensions         = 4;
+  block.Dwork(1).Dimensions         = 3;
   block.Dwork(1).DatatypeID         = 0;
   block.Dwork(1).Complexity         = 'Real';
   block.Dwork(1).UsedAsDiscState    = true;
@@ -67,7 +67,7 @@ function InitConditions(block)
 
   %% Initialize Dwork
 
-  block.Dwork(1).data   = block.DialogPrm(2).data(4:7);
+  block.Dwork(1).data   = block.DialogPrm(2).data(4:6);
 %endfunction
 
 function Output(block)
@@ -78,7 +78,7 @@ function Output(block)
     i_L     = block.InputPort(1).data;
     i_b     = x(3);
     
-    block.OutputPort(1).data = x([4, 1, 2]);
+    block.OutputPort(1).data = x([1, 1, 2]);
     block.OutputPort(1).data(1) = i_b/param(3)+x(2)+a(1)*x(1)^2+a(2)*x(1)+a(3);
     block.OutputPort(2).data = [i_b; i_L-i_b];
 %endfunction
@@ -98,9 +98,12 @@ function Update(block)
     durc    = param(1)*(x(3)-x(2)*param(2));
     dib     = param(3)*(i_L/Cg + x(2)*param(1)*param(2)-x(3)*(1/Cg+param(3)+...
             (2*a(1)*x(1)+a(2))/Qe));
-    dul     = 1/Cg*(i_L-x(3));
+    %dul     = 1/Cg*(i_L-x(3));
     
     block.Dwork(1).Data = [x(1)+Delta*dsoc; x(2)+Delta*durc;
-            x(3)+Delta*dib; x(4)+Delta*dul];
+            x(3)+Delta*dib];
+    %block.Dwork(1).Data = [x(1)+Delta*dsoc; x(2)+Delta*durc;
+            %x(3)+Delta*dib; x(4)+Delta*dul];
+
 
 %endfunction

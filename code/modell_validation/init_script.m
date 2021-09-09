@@ -4,9 +4,9 @@ clear; clc;
 % biphasic current
 t_sim = 1000;
 Delta = 0.04;
-[t, i] = make_bipulse(0.5, t_sim, 20, 15, 10, 30, 100, Delta, 0.25);
+[t, i] = make_bipulse(0.5, t_sim, 20, 15, 10, 30, 100, Delta, 0.45);
 cur_input = timeseries(i,t);
-if(0)
+if(1)
     figure(); grid on
     plot(t, i); xlabel('Time [s]'); ylabel('Current [A]');
     legend('i_{sim}');
@@ -40,7 +40,7 @@ end
 clear u_oc soc phi
 
 %% Run simulation
-w_cap = true;
+w_cap = false;
 if(w_cap)
     filename = 'sim_battery';
 else
